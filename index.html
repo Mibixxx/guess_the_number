@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="script/firebase.js" defer></script>
+    <script type="module" src="script/matchmaking.js" defer></script>
+    <script type="module" src="script/choose.js" defer></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="conteiner">
+        <div class="title">
+            <h1>GUESS THE NUMBER</h1>
+        </div>
+        <div class="main-menu">
+            <div class="src-btn">
+                <button type="button" class="src-btn" id="src-btn">
+                    <span class="btn-text">Cerca avversario</span>
+                </button>
+            </div>
+            <span class="waiting-text" style="display: none;">In attesa di un avversario...</span>
+        </div>
+        <div class="match" style="display: none;">
+            <div class="subtitle">
+                <h2>Scegli un numero</h2>
+            </div>
+            <div class="numbers">
+                <input type="number" class="input" id="num1" min="0" max="9" step="1">
+                <input type="number" class="input" id="num2" min="0" max="9" step="1">
+                <input type="number" class="input" id="num3" min="0" max="9" step="1">
+                <input type="number" class="input" id="num4" min="0" max="9" step="1">
+            </div>
+            <div class="choose-btn">
+                <button type="button" class="choose-btn" id="choose-btn">
+                    <span class="btn-text">Gioca</span>
+                </button>
+            </div>
+            <div class="guess-btn" style="display: none;">
+                <button type="button" class="guess-btn" id="guess-btn">
+                    <span class="btn-text">Indovina</span>
+                </button>
+            </div>
+            <div class="prev-num">
+                <span class="prev-guess">Placeholder</span>
+                <div class="prev-coin" id="prev-coin1"></div>
+                <div class="prev-coin" id="prev-coin2"></div>
+                <div class="prev-coin" id="prev-coin3"></div>
+                <div class="prev-coin" id="prev-coin4"></div>
+            </div>
+            <div class="display-num">
+                <p class="display-num">
+                    <span class="display-guess">Placeholder</span>
+                </p>
+            </div>
+            <div class="coin-container">
+                <div class="coin" id="coin1"></div>
+                <div class="coin" id="coin2"></div>
+                <div class="coin" id="coin3"></div>
+                <div class="coin" id="coin4"></div>
+            </div>
+        </div>
+        <div class="results" style="display: none;">
+            <p id="res-text1"></p>
+            <p id="res-text2">La combo del tuo avversario è</p>
+            <p id="res-text3"></p>
+        </div>
+    </div>
+</body>
+
+</html>

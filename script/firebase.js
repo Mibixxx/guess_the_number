@@ -1,0 +1,69 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+import { getDatabase, get, set, ref, update, child, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAHGmtJQOLeBPONBHZ7rMSOcm32Ct3-_ss",
+    authDomain: "guess-the-number-79665.firebaseapp.com",
+    projectId: "guess-the-number-79665",
+    storageBucket: "guess-the-number-79665.firebasestorage.app",
+    messagingSenderId: "769428633738",
+    appId: "1:769428633738:web:0c04b223b7d353c0aa5573",
+    databaseURL: "https://guess-the-number-79665-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase();
+
+//salva match nel DB
+export function saveMatch(playerId1, playerId2) {
+    const matchId = Math.random().toString(36).slice(2, 9);
+    set(ref(database, `match/${matchId}`), {
+        id: matchId,
+        player: {
+            player1: { id: playerId1, },
+            player2: { id: playerId2, },
+        },
+        status: "waiting",
+        winner: "",
+    });
+    return matchId;
+}
+
+//salva combo nel DB
+export async function saveCombo(combo) {
+    const { matchId, playerA, } = await import('./matchmaking.js');
+
+    update(ref(database, `match/${matchId}/player/${playerA}`), {
+        combo: combo,
+    });
+}
+
+//restituisce la combo dell'avversario
+export async function getCombo() {
+    const { matchId, playerB, } = await import('./matchmaking.js');
+    const snapshot = await get(child(ref(database), `match/${matchId}/player/${playerB}`));
+
+    if (snapshot.exists()) {
+        const data = snapshot.val();
+        return data.combo;
+    }
+}
+
+export async function watchMatchStatus() {
+    const { matchId, playerA, } = await import('./matchmaking.js');
+    const { endMatch, } = await import('./choose.js');
+    let watchMatchStatus = null;
+    watchMatchStatus = onValue(ref(database, `match/${matchId}`), (snapshot) => {
+        const data = snapshot.val();
+        if (data.status == "ended") {
+            console.log("match finito");
+            watchMatchStatus();
+            endMatch(data.winner, playerA);
+        }
+    });
+}

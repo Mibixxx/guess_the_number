@@ -1,0 +1,93 @@
+h1,
+h2,
+div,
+input,
+button {
+    text-align: center;
+    font-family: cursive;
+}
+
+div.numbers,
+div.choose-btn,
+div.guess-btn,
+div.subtitle {
+    display: flex;
+    justify-content: center;
+    column-gap: 10px;
+    margin: 10px;
+}
+
+input.input {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+input.input::-webkit-outer-spin-button,
+input.input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+button.choose-btn,
+button.guess-btn,
+button.src-btn {
+    font-size: 30px;
+    margin: 20px;
+    border-radius: 10px;
+    padding: 5px 10px;
+}
+
+span.waiting-text {
+    display: block;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+div.display-num {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+div.coin-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+div.coin {
+    border: 1px solid black;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+#res-text1 {
+    font-size: 50px;
+    font-weight: 600;
+}
+
+#res-text2 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+#res-text3 {
+    font-size: 40px;
+    font-weight: 600;
+}
+
+div.prev-num {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+div.prev-coin {
+    border: 1px solid black;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
