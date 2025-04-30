@@ -4,7 +4,7 @@ div,
 input,
 button {
     text-align: center;
-    font-family: cursive;
+    font-family: cursive, "Comic Sans";
 }
 
 div.numbers,
