@@ -1,18 +1,24 @@
 import * as fb from './firebase.js';
 import { getDatabase, get, ref, onValue, update, } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+import { database, matchId, playerB } from './matchmaking.js';
 
-const chooseBtn = document.querySelector('.choose-btn');
-const guessBtn = document.querySelector('.guess-btn');
+const chooseBtnDiv = document.querySelector('.choose-btn');
+const guessBtnDiv = document.querySelector('.guess-btn');
+const matchDiv = document.querySelector('.match');
+const matchInfoDiv = document.querySelector('.match-info');
+const resultsDiv = document.querySelector('.results');
+const chooseBtn = document.querySelector('#choose-btn');
+const guessBtn = document.querySelector('#guess-btn');
 const num1 = document.querySelector('#num1');
 const num2 = document.querySelector('#num2');
 const num3 = document.querySelector('#num3');
 const num4 = document.querySelector('#num4');
 const guessSpan = document.querySelector('.display-guess');
+const turnSpan = document.querySelector('#turn');
 const prevGuessSpan = document.querySelector('.prev-guess');
 const resText1 = document.querySelector('#res-text1');
 const resText3 = document.querySelector('#res-text3');
-const matchDiv = document.querySelector('.match');
-const resultsDiv = document.querySelector('.results');
+
 
 
 
@@ -57,6 +63,7 @@ chooseBtn.addEventListener('click', function () {
     if (checkInput(numSerie)) {
         startGame(numSerie);
         fb.watchMatchStatus();
+        fb.watchTurn();
     }
 
 })
@@ -83,6 +90,12 @@ guessBtn.addEventListener('click', function () {
             }
         }
 
+        //passo il turno all'avversario: cambio valore di turn nel DB
+        update(ref(database, `match/${matchId}`), {
+            turn: playerB,
+        });
+
+
         //controllo se la scommessa è giusta
         checkNumbers(guess);
     }
@@ -107,6 +120,7 @@ async function startGame(numSerie) {
     fb.saveCombo(numSerie);
 
     //blocco gli input e mostro messaggio di attesa
+    chooseBtn.disabled = true;  //NON FUNZIONA!!!!!
     for (let i = 1; i < 5; i++) {
         let num = document.querySelector(`#num${i}`);
         num.disabled = true;
@@ -122,8 +136,9 @@ async function startGame(numSerie) {
                 status: "started",
             });
             //cambio schermata e pulisco gli input
-            chooseBtn.style.display = "none";
-            guessBtn.style.display = "block";
+            chooseBtnDiv.style.display = "none";
+            guessBtnDiv.style.display = "block";
+            matchInfoDiv.style.display = "block";
             for (let i = 1; i < 5; i++) {
                 let num = document.querySelector(`#num${i}`);
                 num.value = "";

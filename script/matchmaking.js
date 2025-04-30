@@ -96,26 +96,36 @@ function endMatchmaking(playerId1, playerId2) {
                     matchId = match;
                     playerA = 'player1';
                     playerB = 'player2';
+                    //cambio schermata dopo 200ms
+                    setTimeout(() => {
+                        mainMenuDiv.style.display = "none";
+                        matchDiv.style.display = "block";
+                    }, 200);
                     console.log(matchId);
+                    //stacco il listener
                     if (watchMatch) {
                         watchMatch();
                     }
+                    break;
                 }
             } else if (matches[match]['player']['player2']['id'] == playerId1) {
                 if (matches[match]['status'] == "waiting") {
                     matchId = match;
                     playerA = 'player2';
                     playerB = 'player1';
+                    //cambio schermata dopo 200ms
+                    setTimeout(() => {
+                        mainMenuDiv.style.display = "none";
+                        matchDiv.style.display = "block";
+                    }, 200);
                     console.log(matchId);
+                    //stacco il listener
                     if (watchMatch) {
                         watchMatch();
                     }
+                    break;
                 }
             }
         }
-    })
-
-    //cambio schermata
-    mainMenuDiv.style.display = "none";
-    matchDiv.style.display = "block";
+    });
 }

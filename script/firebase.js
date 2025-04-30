@@ -30,6 +30,7 @@ export function saveMatch(playerId1, playerId2) {
         },
         status: "waiting",
         winner: "",
+        turn: "player1",
     });
     return matchId;
 }
@@ -64,6 +65,23 @@ export async function watchMatchStatus() {
             console.log("match finito");
             watchMatchStatus();
             endMatch(data.winner, playerA);
+        }
+    });
+}
+
+export async function watchTurn() {
+    const { matchId, playerA, } = await import('./matchmaking.js');
+    const guessBtn = document.querySelector('#guess-btn');
+    const turnSpan = document.querySelector('#turn');
+    let watchTurn = null;
+    watchTurn = onValue(ref(database, `match/${matchId}/turn`), (snapshot) => {
+        const data = snapshot.val();
+        if(data == playerA) {
+            guessBtn.disabled = false;
+            turnSpan.textContent = "Tocca a te!";
+        } else {
+            guessBtn.disabled = true;
+            turnSpan.textContent = "Tocca al tuo avversario...";
         }
     });
 }
