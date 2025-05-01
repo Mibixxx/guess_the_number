@@ -80,17 +80,20 @@ guessBtn.addEventListener('click', function () {
     numSerie = guess.join("");
     if (checkInput(numSerie)) {
         //update numbers of the previous guess
-        prevGuessSpan.textContent = guessSpan.textContent || "placeholder";
-        guessSpan.textContent = numSerie;
-        for (let i = 1; i <= 5; i++) {
-            let prevCoin = document.querySelector(`#prev-coin${i}`);
-            let coin = document.querySelector(`#coin${i}`);
-            if (coin && prevCoin) {
-                prevCoin.style.backgroundColor = window.getComputedStyle(coin).backgroundColor;
+        if (guessSpan.textContent != "Match started") {
+            prevGuessSpan.textContent = guessSpan.textContent || "placeholder";
+            for (let i = 1; i <= 5; i++) {
+                let prevCoin = document.querySelector(`#prev-coin${i}`);
+                let coin = document.querySelector(`#coin${i}`);
+                if (coin && prevCoin) {
+                    prevCoin.style.backgroundColor = window.getComputedStyle(coin).backgroundColor;
+                }
             }
         }
 
-        //pass the turn to the opponent
+        guessSpan.textContent = numSerie;
+        
+        //pass the turn to the opponent by updating the BD => onWatch will be called
         update(ref(database, `match/${matchId}`), {
             turn: playerB,
         });

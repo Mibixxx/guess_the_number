@@ -77,10 +77,10 @@ export async function watchTurn() {
         const data = snapshot.val();
         if(data == playerA) {
             guessBtn.disabled = false;
-            turnSpan.textContent = "Tocca a te!";
+            turnSpan.textContent = "It's your turn!";
         } else {
             guessBtn.disabled = true;
-            turnSpan.textContent = "Tocca al tuo avversario...";
+            turnSpan.textContent = "It's your opponents turn...";
         }
     });
 }
