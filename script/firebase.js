@@ -1,10 +1,7 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 import { getDatabase, get, set, ref, update, child, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAHGmtJQOLeBPONBHZ7rMSOcm32Ct3-_ss",
     authDomain: "guess-the-number-79665.firebaseapp.com",
@@ -19,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase();
 
-//salva match nel DB
+//save match in the DB
 export function saveMatch(playerId1, playerId2) {
     const matchId = Math.random().toString(36).slice(2, 9);
     set(ref(database, `match/${matchId}`), {
@@ -35,7 +32,7 @@ export function saveMatch(playerId1, playerId2) {
     return matchId;
 }
 
-//salva combo nel DB
+//save combo in the DB
 export async function saveCombo(combo) {
     const { matchId, playerA, } = await import('./matchmaking.js');
 
@@ -44,7 +41,7 @@ export async function saveCombo(combo) {
     });
 }
 
-//restituisce la combo dell'avversario
+//get the opponent's combo
 export async function getCombo() {
     const { matchId, playerB, } = await import('./matchmaking.js');
     const snapshot = await get(child(ref(database), `match/${matchId}/player/${playerB}`));
@@ -55,6 +52,7 @@ export async function getCombo() {
     }
 }
 
+// watch the match status until its "ended"
 export async function watchMatchStatus() {
     const { matchId, playerA, } = await import('./matchmaking.js');
     const { endMatch, } = await import('./choose.js');
@@ -69,6 +67,7 @@ export async function watchMatchStatus() {
     });
 }
 
+// watch if its turn of player A or B
 export async function watchTurn() {
     const { matchId, playerA, } = await import('./matchmaking.js');
     const guessBtn = document.querySelector('#guess-btn');

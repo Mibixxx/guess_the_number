@@ -25,12 +25,12 @@ const resText3 = document.querySelector('#res-text3');
 const numbers = [];
 let guess = [];
 
-// eventi quando la pagina viene caricata
+// events on page load
 document.addEventListener('DOMContentLoaded', function () {
     num1.focus();
 })
 
-//accetto solo 1 valore per ogni input
+// keeps only the first char of the input
 document.addEventListener('input', function (event) {
     if (window[`${event.target.id}`].value.length > 1) {
         window[`${event.target.id}`].value = window[`${event.target.id}`].value.slice(0, 1);
@@ -38,27 +38,27 @@ document.addEventListener('input', function (event) {
 
 })
 
-//quando valore input sposto focus su input successivo
+//when input change, move focus to the next input
 document.addEventListener('input', function (event) {
-    let inputNum = event.target.id[event.target.id.length - 1];     //prendo l'ultimo carattere del ID del input per sapere quale è stato selezionato
+    let inputNum = event.target.id[event.target.id.length - 1];     //get the last char of the input name to know which input is selected currently
     if (inputNum < 4) {
         inputNum++;
         window[`num${inputNum}`].focus();
     }
 })
 
-// click sul bottone salva
+// click on save button
 chooseBtn.addEventListener('click', function () {
 
     let numSerie = "";
 
-    // salvo i valori nell'array numbers
+    // save values in array "numbers"
     numbers[0] = num1.value;
     numbers[1] = num2.value;
     numbers[2] = num3.value;
     numbers[3] = num4.value;
 
-    // unisco i valori in una Stringa e controllo siano 4 cifre
+    // convert array in a string and check that lenght = 4
     numSerie = numbers.join("");
     if (checkInput(numSerie)) {
         startGame(numSerie);
@@ -71,7 +71,7 @@ chooseBtn.addEventListener('click', function () {
 guessBtn.addEventListener('click', function () {
     let numSerie = "";
 
-    // salvo i valori nell'array guess
+    // save values in array "guess"
     guess[0] = num1.value;
     guess[1] = num2.value;
     guess[2] = num3.value;
@@ -79,7 +79,7 @@ guessBtn.addEventListener('click', function () {
 
     numSerie = guess.join("");
     if (checkInput(numSerie)) {
-        //aggiorno i valori della scommessa precedente
+        //update numbers of the previous guess
         prevGuessSpan.textContent = guessSpan.textContent || "placeholder";
         guessSpan.textContent = numSerie;
         for (let i = 1; i <= 5; i++) {
@@ -90,17 +90,17 @@ guessBtn.addEventListener('click', function () {
             }
         }
 
-        //passo il turno all'avversario: cambio valore di turn nel DB
+        //pass the turn to the opponent
         update(ref(database, `match/${matchId}`), {
             turn: playerB,
         });
 
 
-        //controllo se la scommessa è giusta
+        //check how many numbers of the guess are correct
         checkNumbers(guess);
     }
 
-    //resetto tutti gli input e metto focus su primo
+    //reset all inputs and set focus on the first one
     num1.value = "";
     num2.value = "";
     num3.value = "";
@@ -108,6 +108,7 @@ guessBtn.addEventListener('click', function () {
     num1.focus();
 })
 
+//check if the lenght of the input is = 4
 function checkInput(numSerie) {
     if (numSerie.length == 4) {
         return true;
@@ -119,15 +120,15 @@ function checkInput(numSerie) {
 async function startGame(numSerie) {
     fb.saveCombo(numSerie);
 
-    //blocco gli input e mostro messaggio di attesa
-    chooseBtn.disabled = true;  //NON FUNZIONA!!!!!
+    //disable all inputs and show "waiting" message
+    chooseBtn.disabled = true;
     for (let i = 1; i < 5; i++) {
         let num = document.querySelector(`#num${i}`);
         num.disabled = true;
     }
     const { matchId, playerB } = await import('./matchmaking.js');
     const database = getDatabase();
-    //aspetto che il playerB abbia scelto una combo prima di procedere
+    //wait for the player B to choose a combo and then start the match
     let watchCombo = null;
     watchCombo = onValue(ref(database, `match/${matchId}/player/${playerB}/combo`), (snapshot) => {
         const data = snapshot.val();
@@ -135,7 +136,7 @@ async function startGame(numSerie) {
             update(ref(database, `match/${matchId}`), {
                 status: "started",
             });
-            //cambio schermata e pulisco gli input
+            //go to the next screen and reset the inputs
             chooseBtnDiv.style.display = "none";
             guessBtnDiv.style.display = "block";
             matchInfoDiv.style.display = "block";
@@ -144,21 +145,26 @@ async function startGame(numSerie) {
                 num.value = "";
                 num.disabled = false;
             }
-            guessSpan.textContent = "Partita iniziata";
+            guessSpan.textContent = "Match started";
             num1.focus();
             watchCombo();
         }
     });
 }
 
+//check how many numbers of the guess combo are correct
 async function checkNumbers(guess) {
     let green = 0;
     let yellow = 0;
     let red = 0;
 
-    let combo = await fb.getCombo();  //prendo la combo avversaria
-    combo = combo.split(''); // converto combo in un array
+    let combo = await fb.getCombo();  //get opponents combo
+    combo = combo.split(''); // convert in a array
 
+    //check how many numbers are green, yellow or red
+    //green: correct number and correct position
+    //yellow: correct number in wrong position
+    //red: wrong number
     for (let index in guess) {
         if (guess[index] == combo[index]) {
             green++;
@@ -169,6 +175,7 @@ async function checkNumbers(guess) {
         }
     }
 
+    //change coins color based on values green, yellow and red
     for (let i = 1; i <= green; i++) {
         let coin = document.querySelector(`#coin${i}`);
         coin.style.backgroundColor = "green";
@@ -182,6 +189,7 @@ async function checkNumbers(guess) {
         coin.style.backgroundColor = "red";
     }
 
+    //when its 4 greens, end the match (win)
     if (green == 4) {
         const { matchId, playerA, } = await import('./matchmaking.js');
         const database = getDatabase();
@@ -189,19 +197,18 @@ async function checkNumbers(guess) {
             status: "ended",
             winner: playerA,
         });
-        guessSpan.textContent = "BRAVO COGLIONE!!";
     }
 }
 
 export async function endMatch(winner, playerA) {
-    console.log("vincitore: " + winner);
+    console.log("winner: " + winner);
     matchDiv.style.display = "none";
     resultsDiv.style.display = "block";
     if (winner == playerA) {
-        resText1.textContent = "Hai vinto!";
+        resText1.textContent = "You won! Yee-aah!!";
         resText3.textContent = await fb.getCombo();
     } else {
-        resText1.textContent = "Hai perso!";
+        resText1.textContent = "You lost! Ah-ah!!";
         resText3.textContent = await fb.getCombo();
     }
 }

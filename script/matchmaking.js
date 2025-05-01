@@ -16,14 +16,8 @@ srcBtn.addEventListener('click', function () {
     waitingText.style.display = "block";
 });
 
-//avvia matchmaking, salva player nella waiting list
+//start matchmaking, save players ID in the waiting list
 function startMatchmaking(playerId) {
-
-    // Quando il player si disconnette, rimuovilo dalla waiting list
-    onDisconnect(ref(database, `waiting_list/${playerId}`)).remove().catch((error) => {
-        console.error('Errore onDisconnect:', error);
-    });
-
     set(ref(database, `waiting_list/${playerId}`), {
         status: "waiting"
     }).then(() => {
@@ -31,21 +25,25 @@ function startMatchmaking(playerId) {
     }).catch((error) => {
         console.error('errore startMatchmaking : ' + error);
     });
+
+    // if player disconnects, remove from waiting list
+    onDisconnect(ref(database, `waiting_list/${playerId}`)).remove().catch((error) => {
+        console.error('Errore onDisconnect:', error);
+    });
 }
 
-//resta in attesa di altri player guardando cambiamenti nella waiting list
+//wait for other players (watch the waiting list)
 function waitForContestant(playerId) {
-
-    //ogni volta che un dato viene creato/eliminato dal DB questa funzione viene chiamata
     let watchWaitingList = null;
     watchWaitingList = onValue(ref(database, "waiting_list"), (snapshot) => {
-        const waitingList = snapshot.val() || {};   // fallback se waitingList è null
+        const waitingList = snapshot.val() || {};   // fallback if waitingList is null
 
-        //controlla tutti i player nella waiting list per trovare un match
+        //check all players in the waiting list to find a match
         for (const contestantId of Object.keys(waitingList)) {
             if (contestantId != playerId && waitingList[contestantId].status == "waiting") {
                 console.log('match trovato');
 
+                //usa runTransaction to make sure that when a match is found, only one match is created in the database
                 runTransaction(ref(database, 'waiting_list'), (data) => {
                     if (data[playerId]['status'] == 'waiting' && data[contestantId]['status'] == 'waiting') {
                         data[playerId]['status'] = 'matched';
@@ -58,16 +56,16 @@ function waitForContestant(playerId) {
                     }
                 }).then((result) => {
                     if (result.committed) {
-                        //salvo il match solo tramite il player che ha completato la transaction
+                        //save the match only through the player that completes the transaction
                         fb.saveMatch(playerId, contestantId);
                         console.log('match salvato');
                     }
                 }).catch((error) => {
                     console.log(error);
-                })
+                });
 
                 if (watchWaitingList) {
-                    watchWaitingList();     //stacca il listener
+                    watchWaitingList();     //remove the listener
                 }
                 endMatchmaking(playerId, contestantId);
                 break;
@@ -76,7 +74,7 @@ function waitForContestant(playerId) {
     });
 }
 
-//termina matchmaking, rimuove player dalla waiting list
+//finish the matchmaking, remove the two players from the waiting list
 function endMatchmaking(playerId1, playerId2) {
     remove(ref(database, `waiting_list/${playerId1}`)).catch((error) => {
         console.error('errore endtMatchmaking player 1: ' + error);
@@ -85,8 +83,8 @@ function endMatchmaking(playerId1, playerId2) {
         console.error('errore endMatchmaking player 2: ' + error);
     });
 
-    //salva il matchId in una variabile da passare agli altri file
-    //uso onValue() altrimenti il playerB cerca il match nel DB quando ancora non esiste
+    //save the matchID in a variable that will be passed to other files
+    //use onValue() otherwise playerB will search for the match in the DB when its not created yet
     let watchMatch = null;
     watchMatch = onValue(ref(database, 'match'), (snapshot) => {
         const matches = snapshot.val() || {};
@@ -96,13 +94,13 @@ function endMatchmaking(playerId1, playerId2) {
                     matchId = match;
                     playerA = 'player1';
                     playerB = 'player2';
-                    //cambio schermata dopo 200ms
+                    //change screen after 200ms to avoid getting stuck in the previous page
                     setTimeout(() => {
                         mainMenuDiv.style.display = "none";
                         matchDiv.style.display = "block";
                     }, 200);
                     console.log(matchId);
-                    //stacco il listener
+
                     if (watchMatch) {
                         watchMatch();
                     }
@@ -113,13 +111,13 @@ function endMatchmaking(playerId1, playerId2) {
                     matchId = match;
                     playerA = 'player2';
                     playerB = 'player1';
-                    //cambio schermata dopo 200ms
+                    //change screen after 200ms to avoid getting stuck in the previous page
                     setTimeout(() => {
                         mainMenuDiv.style.display = "none";
                         matchDiv.style.display = "block";
                     }, 200);
                     console.log(matchId);
-                    //stacco il listener
+
                     if (watchMatch) {
                         watchMatch();
                     }
